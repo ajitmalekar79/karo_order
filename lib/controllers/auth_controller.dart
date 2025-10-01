@@ -54,9 +54,10 @@ class AuthController extends GetxController {
     _setState(AuthState.loading);
     try {
       final user = await _authService.signUp(
-        username: username,
-        mobileNo: mobileNo,
+        name: username,
+        mobile: mobileNo,
         password: password,
+        userTypeId: '2',
         email: email,
       );
 

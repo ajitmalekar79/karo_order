@@ -8,26 +8,33 @@ class AuthService {
 
   // Sign up with mobile number as username
   Future<UserModel?> signUp({
-    required String username,
-    required String mobileNo,
+    required String name,
+    required String mobile,
     required String password,
+    required String userTypeId,
     String? email,
   }) async {
     try {
-      // Create auth user with mobile number as email (workaround for Supabase)
+      // Create auth user (Supabase auth system)
       final authResponse = await _client.auth.signUp(
-        email: '$mobileNo@karoorder.com', // Use mobile as unique email
+        email: email,
         password: password,
       );
 
       if (authResponse.user != null) {
-        // Create user profile in custom table
+        // Match the database table schema
         final userProfile = {
-          'id': authResponse.user!.id,
-          'username': username,
-          'mobile_no': mobileNo,
+          'user_id': authResponse.user!.id, // maps to UUID PK
+          'user_type_id': userTypeId, // must exist in user_types
+          'name': name,
           'email': email,
+          'password_hash': password, // ⚠️ ideally store a hash
+          'mobile': mobile,
+          'is_active': true,
+          'is_deleted': false,
+          'has_requested_vendor_approval': true,
           'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
         };
 
         final response = await _client
@@ -52,7 +59,7 @@ class AuthService {
     try {
       // Sign in using mobile number as email
       final authResponse = await _client.auth.signInWithPassword(
-        email: '$mobileNo@karoorder.com',
+        email: 'tester@gmail.com', //'$mobileNo@karoorder.com',
         password: password,
       );
 

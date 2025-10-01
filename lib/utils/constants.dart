@@ -1,8 +1,9 @@
 class AppConstants {
   // Supabase Configuration
   // NOTE: Replace these with your actual Supabase project URL and anon key
-  static const String supabaseUrl = 'YOUR_SUPABASE_PROJECT_URL';
-  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+  static const String supabaseUrl = 'https://kqkplumzkfnanhiihilu.supabase.co';
+  static const String supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtxa3BsdW16a2ZuYW5oaWloaWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5NDg0MTgsImV4cCI6MjA3NDUyNDQxOH0.2tHHJOo7m_eh2VQ_eYgQUDiPGd0INEFeaYBSjF--D_k';
 
   // App Configuration
   static const String appName = 'Karo Order';
