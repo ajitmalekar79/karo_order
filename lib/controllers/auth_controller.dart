@@ -57,7 +57,7 @@ class AuthController extends GetxController {
         name: username,
         mobile: mobileNo,
         password: password,
-        userTypeId: '2',
+        userTypeId: 'cf114ec4-d0b9-4d10-b224-cc8de83371ed',
         email: email,
       );
 

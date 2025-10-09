@@ -18,6 +18,8 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
+  final authController = Get.find<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -43,17 +45,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAuthStatus() async {
-    // Wait for animation to complete
     await Future.delayed(const Duration(seconds: 3));
 
     if (!mounted) return;
 
-    final authController = Get.find<AuthController>();
-
-    // Wait for auth initialization
+    // Wait until auth initialization completes
     while (authController.state == AuthState.initial ||
         authController.state == AuthState.loading) {
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 200));
       if (!mounted) return;
     }
 
@@ -64,13 +63,8 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
-  void _navigateToHome() {
-    Get.offAllNamed(AppRoutes.home);
-  }
-
-  void _navigateToSignIn() {
-    Get.offAllNamed(AppRoutes.signIn);
-  }
+  void _navigateToHome() => Get.offAllNamed(AppRoutes.home);
+  void _navigateToSignIn() => Get.offAllNamed(AppRoutes.signIn);
 
   @override
   void dispose() {
@@ -86,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Logo/Icon
+            // App Icon
             AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {
@@ -122,79 +116,61 @@ class _SplashScreenState extends State<SplashScreen>
             const SizedBox(height: 30),
 
             // App Name
-            AnimatedBuilder(
-              animation: _fadeAnimation,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Text(
-                    AppConstants.appName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: Text(
+                AppConstants.appName,
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
 
             const SizedBox(height: 10),
 
-            // App Tagline
-            AnimatedBuilder(
-              animation: _fadeAnimation,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Text(
-                    'Your Order, Our Priority',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                  ),
-                );
-              },
+            // Tagline
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: Text(
+                'Your Order, Our Priority',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
             ),
 
             const SizedBox(height: 60),
 
-            // Loading Indicator
-            GetX<AuthController>(
-              builder: (authController) {
-                return AnimatedBuilder(
-                  animation: _fadeAnimation,
-                  builder: (context, child) {
-                    return FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            width: 30,
-                            height: 30,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                              strokeWidth: 3,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            _getLoadingText(authController.state),
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
+            // ✅ Reactive Loading Text
+            Obx(() {
+              final currentState = authController.state;
+              return FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 3,
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      _getLoadingText(currentState),
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -210,9 +186,9 @@ class _SplashScreenState extends State<SplashScreen>
       case AuthState.authenticated:
         return 'Welcome back!';
       case AuthState.unauthenticated:
-        return 'Loading...';
+        return 'Please sign in...';
       case AuthState.error:
-        return 'Loading...';
+        return 'Something went wrong...';
     }
   }
 }

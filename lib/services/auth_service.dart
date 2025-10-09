@@ -15,40 +15,58 @@ class AuthService {
     String? email,
   }) async {
     try {
-      // Create auth user (Supabase auth system)
+      // 1️⃣ Create user in Supabase Auth
       final authResponse = await _client.auth.signUp(
         email: email,
         password: password,
       );
 
-      if (authResponse.user != null) {
-        // Match the database table schema
-        final userProfile = {
-          'user_id': authResponse.user!.id, // maps to UUID PK
-          'user_type_id': userTypeId, // must exist in user_types
-          'name': name,
-          'email': email,
-          'password_hash': password, // ⚠️ ideally store a hash
-          'mobile': mobile,
-          'is_active': true,
-          'is_deleted': false,
-          'has_requested_vendor_approval': true,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        };
-
-        final response = await _client
-            .from(_userTableName)
-            .insert(userProfile)
-            .select()
-            .single();
-
-        return UserModel.fromJson(response);
+      final authUser = authResponse.user;
+      if (authUser == null) {
+        throw Exception('User creation failed in Supabase Auth.');
       }
+
+      // 2️⃣ Create matching record in your "users" table
+      final userProfile = {
+        'user_id': authUser.id,
+        'user_type_id': userTypeId,
+        'name': name,
+        'email': email,
+        'password_hash': password, // ideally hashed
+        'mobile': mobile,
+        'is_active': true,
+        'is_deleted': false,
+        'has_requested_vendor_approval': true,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // Insert user into "users" and return the created record
+      await _client
+          .from(_userTableName)
+          .insert(userProfile)
+          .select('*')
+          .maybeSingle();
+
+      // 3️⃣ If insert didn’t return data, fetch manually by user_id
+
+      final fetchResponse = await _client
+          .from(_userTableName)
+          .select('*')
+          .eq('user_id', authUser.id)
+          .maybeSingle();
+
+      if (fetchResponse == null) {
+        throw Exception('User record not found after insertion.');
+      }
+      return UserModel.fromJson(fetchResponse);
+    } on PostgrestException catch (e) {
+      throw Exception('Database error: ${e.message}');
+    } on AuthException catch (e) {
+      throw Exception('Auth error: ${e.message}');
     } catch (e) {
       throw Exception('Sign up failed: ${e.toString()}');
     }
-    return null;
   }
 
   // Sign in with mobile number
@@ -59,7 +77,7 @@ class AuthService {
     try {
       // Sign in using mobile number as email
       final authResponse = await _client.auth.signInWithPassword(
-        email: 'tester@gmail.com', //'$mobileNo@karoorder.com',
+        email: mobileNo, //'$mobileNo@karoorder.com',
         password: password,
       );
 
@@ -68,7 +86,7 @@ class AuthService {
         final response = await _client
             .from(_userTableName)
             .select()
-            .eq('id', authResponse.user!.id)
+            .eq('user_id', authResponse.user!.id)
             .single();
 
         final user = UserModel.fromJson(response);

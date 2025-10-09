@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:karo_order/utils/color_constants.dart';
 import '../controllers/auth_controller.dart';
 import '../utils/validators.dart';
 import '../utils/constants.dart';
@@ -15,14 +16,14 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _mobileController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _mobileController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -37,7 +38,7 @@ class _SignInScreenState extends State<SignInScreen> {
     final authController = Get.find<AuthController>();
 
     final success = await authController.signIn(
-      mobileNo: _mobileController.text.trim(),
+      mobileNo: _emailController.text.trim(),
       password: _passwordController.text,
     );
 
@@ -111,14 +112,13 @@ class _SignInScreenState extends State<SignInScreen> {
                   children: [
                     // Mobile Number Field
                     TextFormField(
-                      controller: _mobileController,
-                      keyboardType: TextInputType.phone,
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
-                        labelText: 'Mobile Number',
-                        hintText: 'Enter your mobile number',
-                        prefixIcon: const Icon(Icons.phone),
-                        prefixText: '+91 ',
+                        labelText: 'Email Address',
+                        hintText: 'Enter your email',
+                        prefixIcon: const Icon(Icons.email_outlined),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -126,17 +126,18 @@ class _SignInScreenState extends State<SignInScreen> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Colors.grey[300]!),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                        focusedBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          borderSide: BorderSide(
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
                         filled: true,
                         fillColor: Colors.white,
                       ),
-                      validator: Validators.validateMobileNumber,
+                      validator: Validators
+                          .validateEmail, // <-- make sure this exists in your Validators
                     ),
 
                     const SizedBox(height: 20),
@@ -173,7 +174,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -192,7 +193,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signIn,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
+                          backgroundColor: AppColors.buttonColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -238,7 +239,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Text(
                         'Forgot Password?',
                         style: GoogleFonts.poppins(
-                          color: Colors.deepPurple,
+                          color: AppColors.themeColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -262,7 +263,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: Text(
                       'Sign Up',
                       style: GoogleFonts.poppins(
-                        color: Colors.deepPurple,
+                        color: AppColors.themeColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

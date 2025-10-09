@@ -49,6 +49,7 @@ dependencies:
   
   # UI components
   google_fonts: ^6.2.1
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:

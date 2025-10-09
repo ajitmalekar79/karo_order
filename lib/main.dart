@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karo_order/utils/color_constants.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'bindings/app_binding.dart';
 import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 import 'utils/constants.dart';
@@ -26,9 +28,10 @@ class KaroOrderApp extends StatelessWidget {
     return GetMaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+      initialBinding: AppBindings(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+          seedColor: AppColors.primaryColor,
           brightness: Brightness.light,
         ),
         useMaterial3: true,

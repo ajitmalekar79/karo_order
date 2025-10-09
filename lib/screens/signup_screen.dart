@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
+import '../utils/color_constants.dart';
 import '../utils/validators.dart';
 import '../utils/constants.dart';
 import '../routes/app_routes.dart';
@@ -149,7 +150,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -181,7 +182,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -212,7 +213,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -255,7 +256,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -300,7 +301,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Colors.deepPurple,
+                            color: AppColors.themeColor,
                             width: 2,
                           ),
                         ),
@@ -326,7 +327,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               _agreeToTerms = value ?? false;
                             });
                           },
-                          activeColor: Colors.deepPurple,
+                          activeColor: AppColors.themeColor,
                         ),
                         Expanded(
                           child: GestureDetector(
@@ -348,7 +349,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     TextSpan(
                                       text: 'Terms and Conditions',
                                       style: GoogleFonts.poppins(
-                                        color: Colors.deepPurple,
+                                        color: AppColors.themeColor,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -356,7 +357,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     TextSpan(
                                       text: 'Privacy Policy',
                                       style: GoogleFonts.poppins(
-                                        color: Colors.deepPurple,
+                                        color: AppColors.themeColor,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -378,7 +379,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _signUp,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
+                          backgroundColor: AppColors.themeColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -421,7 +422,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: Text(
                             'Sign In',
                             style: GoogleFonts.poppins(
-                              color: Colors.deepPurple,
+                              color: AppColors.themeColor,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
