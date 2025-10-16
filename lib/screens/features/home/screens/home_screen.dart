@@ -272,7 +272,10 @@ class HomeScreen extends StatelessWidget {
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         child: Text(
                           'Categories',
                           style: GoogleFonts.poppins(
@@ -330,15 +333,18 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 10),
 
                     // 🧾 Recent Orders
-                    Text(
-                      'Products',
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Text(
+                        'Products',
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
                       ),
                     ),
 
@@ -369,67 +375,71 @@ class HomeScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final product = products[index];
 
-                          return Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(12),
+                          return Container(
+                            padding: EdgeInsets.all(2),
+                            child: Card(
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(12),
+                                      ),
+                                      child: Image.network(
+                                        product.imageUrl.isNotEmpty
+                                            ? product.imageUrl
+                                            : '',
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              // Show placeholder if image fails
+                                              return Container(
+                                                width: double.infinity,
+                                                color: Colors.grey[200],
+                                                child: const Icon(
+                                                  Icons.image_not_supported,
+                                                  color: Colors.grey,
+                                                  size: 48,
+                                                ),
+                                              );
+                                            },
+                                        loadingBuilder:
+                                            (context, child, progress) {
+                                              if (progress == null)
+                                                return child;
+                                              return const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                      ),
                                     ),
-                                    child: Image.network(
-                                      product.imageUrl.isNotEmpty
-                                          ? product.imageUrl
-                                          : '',
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                            // Show placeholder if image fails
-                                            return Container(
-                                              width: double.infinity,
-                                              color: Colors.grey[200],
-                                              child: const Icon(
-                                                Icons.image_not_supported,
-                                                color: Colors.grey,
-                                                size: 48,
-                                              ),
-                                            );
-                                          },
-                                      loadingBuilder:
-                                          (context, child, progress) {
-                                            if (progress == null) return child;
-                                            return const Center(
-                                              child:
-                                                  CircularProgressIndicator(),
-                                            );
-                                          },
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      product.name,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    product.name,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                  Text(
+                                    '₹${product.price.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green.shade700,
+                                      fontSize: 14,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  '₹${product.price.toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.green.shade700,
-                                    fontSize: 14,
-                                  ),
-                                ),
 
-                                const SizedBox(height: 8),
-                              ],
+                                  const SizedBox(height: 8),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -448,7 +458,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildCategoryCard(String title, String? imageUrl, Color color) {
     return Container(
       width: 90,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.only(left: 20, right: 5),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Colors.green, Colors.lightGreen],

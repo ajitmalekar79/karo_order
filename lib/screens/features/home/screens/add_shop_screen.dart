@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
+import 'scan_view.dart';
+
 class AddShopPage extends StatelessWidget {
   AddShopPage({super.key});
 
@@ -26,11 +28,7 @@ class AddShopPage extends StatelessWidget {
 
   void _scanQr() {
     // QR scan logic
-    Get.snackbar(
-      "Scan QR",
-      "QR scan started",
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.to(ScanView());
   }
 
   void _enterCode(BuildContext context) {
