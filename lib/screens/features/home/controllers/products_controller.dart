@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/product_model.dart';
+import '../controllers/shop_controller.dart'; // import your ShopController
 
 class ProductController extends GetxController {
   final supabase = Supabase.instance.client;
@@ -8,57 +9,42 @@ class ProductController extends GetxController {
   var products = <ProductModel>[].obs;
   var isLoading = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchProducts();
-  }
-
   Future<void> fetchProducts() async {
     try {
-      isLoading(true);
+      isLoading.value = true;
+
+      // 🔹 Get selected shop vendor ID
+      final shopController = Get.find<ShopController>();
+      final selectedShop = shopController.selectedShop.value;
+
+      if (selectedShop == null) {
+        Get.snackbar('Error', 'No shop selected.');
+        isLoading.value = false;
+        return;
+      }
+
+      final vendorId = selectedShop.userId;
+
+      // 🔹 Fetch ALL columns from Supabase for this vendor
       final response = await supabase
           .from('products')
-          .select('id, name, image_url, price')
-          .order('name', ascending: true);
+          .select() // fetch all columns
+          .eq('vendor_id', vendorId)
+          .order('created_at', ascending: true);
 
       if (response != null && response is List) {
         products.assignAll(
-          response.map((e) => ProductModel.fromJson(e)).toList(),
+          response.map((item) => ProductModel.fromJson(item)).toList(),
         );
       } else {
-        _addDummyData();
+        products.clear();
+        Get.snackbar('Info', 'No products found for this vendor.');
       }
     } catch (e) {
-      print('Error fetching products: $e');
-      _addDummyData();
+      Get.snackbar('Error', 'Failed to fetch products: $e');
+      products.clear();
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
-  }
-
-  void _addDummyData() {
-    products.assignAll([
-      ProductModel(
-        id: '1',
-        name: 'Apple iPhone 15',
-        imageUrl: 'https://macstoreonline.com.mx/img/sku/iphone735_FZ.jpg',
-        price: 999.99,
-      ),
-      ProductModel(
-        id: '2',
-        name: 'Samsung Galaxy S25',
-        imageUrl:
-            'https://m.media-amazon.com/images/I/51VfGGh7quL._UF894,1000_QL80_.jpg',
-        price: 899.99,
-      ),
-      ProductModel(
-        id: '3',
-        name: 'Sony Headphones',
-        imageUrl:
-            'https://m.media-amazon.com/images/I/510cs9VwjUL._UF1000,1000_QL80_.jpg',
-        price: 199.99,
-      ),
-    ]);
   }
 }

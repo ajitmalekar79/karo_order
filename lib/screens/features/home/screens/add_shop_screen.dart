@@ -1,14 +1,21 @@
 // pages/add_shop_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:karo_order/controllers/auth_controller.dart';
+import 'package:karo_order/screens/features/home/controllers/shop_controller.dart';
 import 'package:lottie/lottie.dart';
 
+import '../controllers/customer_vendor_controller.dart';
 import 'scan_view.dart';
 
 class AddShopPage extends StatelessWidget {
   AddShopPage({super.key});
 
   final TextEditingController _shopCodeController = TextEditingController();
+  final customerVendorController = Get.put(CustomerVendorController());
+  final authController = Get.find<AuthController>();
+  late final user = authController.user;
+  final shopController = Get.find<ShopController>();
 
   // Gradient Colors
   final LinearGradient greenGradient = const LinearGradient(
@@ -17,21 +24,17 @@ class AddShopPage extends StatelessWidget {
     end: Alignment.bottomCenter,
   );
 
-  void _addShop() {
+  void _addShop() async {
     // Logic to add a shop manually
-    Get.snackbar(
-      "Add Shop",
-      "Shop added successfully!",
-      snackPosition: SnackPosition.BOTTOM,
-    );
   }
 
-  void _scanQr() {
+  void _scanQr() async {
     // QR scan logic
-    Get.to(ScanView());
+    await Get.to(ScanView());
+    shopController.fetchUserShops();
   }
 
-  void _enterCode(BuildContext context) {
+  void _enterCode(BuildContext context) async {
     final code = _shopCodeController.text.trim();
     if (code.isEmpty) {
       Get.snackbar(
@@ -42,57 +45,77 @@ class AddShopPage extends StatelessWidget {
       return;
     }
 
-    // Logic to add shop by code
+    final customerId = user?.userId ?? ''; // Replace accordingly
+
+    // ✅ Call controller method and wait for response
+    final result = await customerVendorController.addShopByCode(
+      code,
+      customerId,
+    );
+
     _shopCodeController.clear();
 
-    // Show animated success popup
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        Future.delayed(const Duration(seconds: 3), () {
-          Navigator.of(ctx).pop();
-        });
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: greenGradient,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.shade200.withOpacity(0.6),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Lottie.network(
-                  'https://assets8.lottiefiles.com/packages/lf20_jbrw3hcz.json',
-                  width: 220,
-                  height: 220,
-                  repeat: false,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Shop Added Successfully!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+    if (result['success']) {
+      // ✅ Show success dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          Future.delayed(const Duration(seconds: 3), () {
+            Navigator.of(ctx).pop();
+          });
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: greenGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.shade200.withOpacity(0.6),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
-                ),
-              ],
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Lottie.network(
+                    'https://assets8.lottiefiles.com/packages/lf20_jbrw3hcz.json',
+                    width: 220,
+                    height: 220,
+                    repeat: false,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Shop Added Successfully!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+
+      shopController.fetchUserShops();
+    } else {
+      // ❌ Show backend error message
+      Get.snackbar(
+        "Error",
+        result['message'] ?? "Something went wrong",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override

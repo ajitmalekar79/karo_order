@@ -1,28 +1,49 @@
 class ProductModel {
-  final String id;
-  final String name;
-  final String imageUrl;
-  final double price;
+  final String productId;
+  final String vendorId;
+  final String productName;
+  final String? productDescription;
+  final double productPrice;
+  final double? discountAmount;
+  final double? discountedPrice;
+  final int stock;
+  final bool isActive;
+  final bool isDeleted;
+  final String productCategoryId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   ProductModel({
-    required this.id,
-    required this.name,
-    required this.imageUrl,
-    required this.price,
+    required this.productId,
+    required this.vendorId,
+    required this.productName,
+    this.productDescription,
+    required this.productPrice,
+    this.discountAmount,
+    this.discountedPrice,
+    required this.stock,
+    required this.isActive,
+    required this.isDeleted,
+    required this.productCategoryId,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  /// Factory constructor to create ProductModel from JSON
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'].toString(),
-      name: json['name'] ?? '',
-      imageUrl: json['image_url'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
+      productId: json['product_id'] ?? '',
+      vendorId: json['vendor_id'] ?? '',
+      productName: json['product_name'] ?? '',
+      productDescription: json['product_description'],
+      productPrice: (json['product_price'] ?? 0).toDouble(),
+      discountAmount: (json['discount_amount'] ?? 0).toDouble(),
+      discountedPrice: (json['discounted_price'] ?? 0).toDouble(),
+      stock: json['stock'] ?? 0,
+      isActive: json['is_active'] ?? true,
+      isDeleted: json['is_deleted'] ?? false,
+      productCategoryId: json['product_category_id'].toString() ?? '',
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
-  }
-
-  /// Convert ProductModel to JSON
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'image_url': imageUrl, 'price': price};
   }
 }

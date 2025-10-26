@@ -6,6 +6,7 @@ import '../controllers/auth_controller.dart';
 import '../utils/constants.dart';
 import '../routes/app_routes.dart';
 import 'features/account/screens/account_screen.dart';
+import 'features/home/controllers/cart_controller.dart';
 import 'features/home/screens/home_screen.dart';
 
 class BaseScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class BaseScreen extends StatefulWidget {
 
 class _BaseScreenState extends State<BaseScreen> {
   int _selectedIndex = 0;
+  final cartController = Get.find<CartController>();
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -28,6 +30,13 @@ class _BaseScreenState extends State<BaseScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    cartController.fetchCart();
   }
 
   @override

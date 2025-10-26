@@ -3,21 +3,35 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:karo_order/utils/color_constants.dart';
 import '../../../../utils/constants.dart';
+import '../controllers/cart_controller.dart';
 import '../controllers/categories_controller.dart';
 import '../controllers/products_controller.dart';
 import '../controllers/shop_controller.dart';
+import 'cart_screen.dart';
 import 'drawer.dart';
 import 'dart:ui';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final shopController = Get.find<ShopController>();
-    final categoryController = Get.put(CategoriesController());
-    final productController = Get.put(ProductController());
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  final shopController = Get.find<ShopController>();
+  final categoryController = Get.put(CategoriesController());
+  final productController = Get.put(ProductController());
+  final cartController = Get.find<CartController>();
+
+  @override
+  void initState() {
+    super.initState();
+    shopController.fetchUserShops();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: AppDrawer(),
@@ -39,10 +53,51 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
+
+          // Cart with badge
+          Obx(() {
+            final itemCount = cartController.cartItems.length;
+
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Get.to(() => CartScreen());
+                  },
+                ),
+                if (itemCount > 0)
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        itemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
         ],
 
         // flexibleSpace: Container(
@@ -314,8 +369,8 @@ class HomeScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final category = categories[index];
                               return _buildCategoryCard(
-                                category['name'] ?? '',
-                                category['image_url'],
+                                category.categoryName ?? '',
+                                category.categoryImagePath,
                                 AppColors.themeColor,
                               );
                             },
@@ -356,9 +411,12 @@ class HomeScreen extends StatelessWidget {
                       }
 
                       final products = productController.products;
+                      final cartController = Get.find<CartController>();
 
                       if (products.isEmpty) {
-                        return Center(child: Text('No products available'));
+                        return const Center(
+                          child: Text('No products available'),
+                        );
                       }
 
                       return GridView.builder(
@@ -374,15 +432,19 @@ class HomeScreen extends StatelessWidget {
                         itemCount: products.length,
                         itemBuilder: (context, index) {
                           final product = products[index];
+                          final quantity = cartController.getQuantity(
+                            product.productId,
+                          );
 
                           return Container(
-                            padding: EdgeInsets.all(2),
+                            padding: const EdgeInsets.all(2),
                             child: Card(
                               elevation: 2,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(
                                     child: ClipRRect(
@@ -390,13 +452,14 @@ class HomeScreen extends StatelessWidget {
                                         top: Radius.circular(12),
                                       ),
                                       child: Image.network(
-                                        product.imageUrl.isNotEmpty
-                                            ? product.imageUrl
-                                            : '',
+                                        // product..isNotEmpty
+                                        //     ? product.imageUrl
+                                        //     :
+                                        'https://via.placeholder.com/150',
                                         fit: BoxFit.cover,
+                                        width: double.infinity,
                                         errorBuilder:
                                             (context, error, stackTrace) {
-                                              // Show placeholder if image fails
                                               return Container(
                                                 width: double.infinity,
                                                 color: Colors.grey[200],
@@ -420,22 +483,123 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 6,
+                                    ),
                                     child: Text(
-                                      product.name,
+                                      product.productName,
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   ),
                                   Text(
-                                    '₹${product.price.toStringAsFixed(2)}',
+                                    '₹${product.discountedPrice!.toStringAsFixed(2)}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: Colors.green.shade700,
                                       fontSize: 14,
                                     ),
                                   ),
+                                  const SizedBox(height: 8),
+
+                                  // 🔹 Add / Plus / Minus Section
+                                  Obx(() {
+                                    final qty = cartController.getQuantity(
+                                      product.productId,
+                                    );
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      child: qty == 0
+                                          ? GestureDetector(
+                                              onTap: () =>
+                                                  cartController.addToCart(
+                                                    product.productId,
+                                                    product.discountedPrice!,
+                                                  ),
+                                              child: Container(
+                                                key: const ValueKey(
+                                                  "addButton",
+                                                ),
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                  gradient: const LinearGradient(
+                                                    colors: [
+                                                      Color(0xFF32CD32),
+                                                      Color(0xFF228B22),
+                                                    ], // Light green → Dark green
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.bottomCenter,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.green
+                                                          .withOpacity(0.3),
+                                                      blurRadius: 4,
+                                                      offset: const Offset(
+                                                        0,
+                                                        2,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: const Text(
+                                                  "Add",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          : Row(
+                                              key: const ValueKey("counterRow"),
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.remove_circle_outline,
+                                                  ),
+                                                  color: Colors.redAccent,
+                                                  onPressed: () =>
+                                                      cartController
+                                                          .updateQuantity(
+                                                            product.productId,
+                                                            qty - 1,
+                                                          ),
+                                                ),
+                                                Text(
+                                                  qty.toString(),
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.add_circle_outline,
+                                                  ),
+                                                  color: Colors.green,
+                                                  onPressed: () =>
+                                                      cartController
+                                                          .updateQuantity(
+                                                            product.productId,
+                                                            qty + 1,
+                                                          ),
+                                                ),
+                                              ],
+                                            ),
+                                    );
+                                  }),
 
                                   const SizedBox(height: 8),
                                 ],

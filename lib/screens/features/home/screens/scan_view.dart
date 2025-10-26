@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../controllers/auth_controller.dart';
+import '../controllers/customer_vendor_controller.dart';
 
 class ScanView extends StatefulWidget {
   const ScanView({super.key});
@@ -20,6 +23,15 @@ class _ScanViewState extends State<ScanView> {
   String isSucess = '';
   late String _currentTime;
   late String _currentDate;
+  final customerVendorController = Get.put(CustomerVendorController());
+  final authController = Get.find<AuthController>();
+  late final user = authController.user;
+
+  final LinearGradient greenGradient = const LinearGradient(
+    colors: [Color(0xFF2E7D32), Color(0xFF66BB6A)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 
   @override
   void initState() {
@@ -57,29 +69,6 @@ class _ScanViewState extends State<ScanView> {
     try {
       if (scanData.isNotEmpty) {
         String jsonString = scanData;
-        final prefs = await SharedPreferences.getInstance();
-        final userId = prefs.getString('UserId');
-        Map<String, dynamic> scanUserData = jsonDecode(jsonString);
-
-        int userID = int.parse(userId!);
-        int productId = scanUserData['productId'];
-        String pointsRedeem = scanUserData['pointsRedeem'];
-        int qrId = scanUserData['qrId'];
-        // await _qrScannerProvider.getScannerData(
-        //     productId, userID, pointsRedeem, qrId, DateTime.now().toString());
-
-        // setState(() {
-        //   isSucess = _qrScannerProvider.isSucess;
-        // });
-
-        // if (isSucess == "true") {
-        //   showCreditedPointsDialog(context);
-        //   _rewardPointController.fetchRewardData();
-        // } else {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     const SnackBar(content: Text('Invalid QR.')),
-        //   );
-        // }
       }
     } catch (e) {
       setState(() {
@@ -94,6 +83,86 @@ class _ScanViewState extends State<ScanView> {
       barrierDismissible: false,
       builder: (context) => AnimatedDialog(),
     );
+  }
+
+  void _enterCode(BuildContext context, code) async {
+    if (code.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Please enter a shop code",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final customerId = user?.userId ?? ''; // Replace accordingly
+
+    // ✅ Call controller method and wait for response
+    final result = await customerVendorController.addShopByCode(
+      code,
+      customerId,
+    );
+
+    if (result['success']) {
+      // ✅ Show success dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          Future.delayed(const Duration(seconds: 3), () {
+            Navigator.of(ctx).pop();
+          });
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: greenGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.shade200.withOpacity(0.6),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Lottie.network(
+                    'https://assets8.lottiefiles.com/packages/lf20_jbrw3hcz.json',
+                    width: 220,
+                    height: 220,
+                    repeat: false,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Shop Added Successfully!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+      Get.back();
+    } else {
+      // ❌ Show backend error message
+      Get.snackbar(
+        "Error",
+        result['message'] ?? "Something went wrong",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -114,7 +183,7 @@ class _ScanViewState extends State<ScanView> {
                         isScanProcessing = true;
                         scanData = barcodes.first.rawValue ?? '';
                         _updateTime();
-                        getValidUser();
+                        _enterCode(context, scanData);
 
                         Future.delayed(const Duration(seconds: 3), () {
                           isScanProcessing = false;

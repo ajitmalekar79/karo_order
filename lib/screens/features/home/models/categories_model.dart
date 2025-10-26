@@ -1,26 +1,35 @@
-class Category {
-  final String id;
-  final String name;
-  final String icon; // store icon name or url
-  final String color; // hex color code or string
+class CategoryModel {
+  final String productCategoryId;
+  final String vendorId;
+  final String categoryName;
+  final String? categoryDescription;
+  final String categoryImagePath;
+  final bool isActive;
+  final bool isDeleted;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  Category({
-    required this.id,
-    required this.name,
-    required this.icon,
-    required this.color,
+  CategoryModel({
+    required this.productCategoryId,
+    required this.vendorId,
+    required this.categoryName,
+    this.categoryDescription,
+    required this.categoryImagePath,
+    this.isActive = true,
+    this.isDeleted = false,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  factory Category.fromMap(Map<String, dynamic> map) {
-    return Category(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      icon: map['icon'] as String? ?? 'restaurant',
-      color: map['color'] as String? ?? '#FF9800',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'icon': icon, 'color': color};
-  }
+  Map<String, dynamic> toJson() => {
+    'product_category_id': productCategoryId,
+    'vendor_id': vendorId,
+    'category_name': categoryName,
+    'category_description': categoryDescription,
+    'category_image_path': categoryImagePath,
+    'is_active': isActive,
+    'is_deleted': isDeleted,
+    'created_at': createdAt.toIso8601String(),
+    'updated_at': updatedAt.toIso8601String(),
+  };
 }
