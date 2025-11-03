@@ -8,6 +8,7 @@ import 'package:karo_order/utils/color_constants.dart';
 
 import '../../../../controllers/auth_controller.dart';
 import '../../../../routes/app_routes.dart';
+import 'address_screen.dart';
 
 class ProfileTabScreen extends StatefulWidget {
   const ProfileTabScreen({super.key});
@@ -231,7 +232,9 @@ class _ProfileTabScreenState extends State<ProfileTabScreen>
                       icon: Icons.location_on_outlined,
                       title: 'My Addresses',
                       color: AppColors.primaryColor,
-                      onTap: () {},
+                      onTap: () {
+                        Get.to(ShippingAddressesPage(currentUserId: ''));
+                      },
                     ),
                     _buildProfileOption(
                       icon: Icons.payment_outlined,

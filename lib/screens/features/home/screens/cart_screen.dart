@@ -17,21 +17,21 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       backgroundColor: const Color(0xfff9f9f9),
       appBar: AppBar(
-        title: const Text("Shopping Cart"),
+        title: const Text("Cart"),
         centerTitle: true,
         backgroundColor: const Color(0xffeaf6ea),
         elevation: 0,
         actions: [
-          TextButton(
-            onPressed: () {},
-            child: const Text(
-              "Edit",
-              style: TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          // TextButton(
+          //   onPressed: () {},
+          //   child: const Text(
+          //     "Edit",
+          //     style: TextStyle(
+          //       color: Colors.green,
+          //       fontWeight: FontWeight.bold,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       body: Obx(() {
